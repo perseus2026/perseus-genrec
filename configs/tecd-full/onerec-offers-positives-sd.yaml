@@ -1,0 +1,43 @@
+extends:
+- onerec-base.yaml
+- data-sd.yaml
+events:
+  t-ecd-full-offers-click:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-full-offers-like:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-full-offers-clickout:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+inputs:
+  short:
+    events:
+    - t-ecd-full-offers-click
+    - t-ecd-full-offers-like
+    - t-ecd-full-offers-clickout
+  like:
+    events:
+    - t-ecd-full-offers-like
+    - t-ecd-full-offers-clickout
+  lifelong:
+    events:
+    - t-ecd-full-offers-click
+    - t-ecd-full-offers-like
+    - t-ecd-full-offers-clickout

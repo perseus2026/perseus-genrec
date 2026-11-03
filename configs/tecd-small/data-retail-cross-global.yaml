@@ -1,0 +1,109 @@
+extends: data-cross-global.yaml
+events:
+  t-ecd-small-retail-like:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-small-retail-click:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 0
+  t-ecd-small-retail-added-to-cart:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 0
+  t-ecd-small-marketplace-click:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+    source: tecd_cross
+    priority: 0
+  t-ecd-small-marketplace-like:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+    source: tecd_cross
+    priority: 0
+  t-ecd-small-marketplace-clickout:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+    source: tecd_cross
+    priority: 0
+  t-ecd-small-offers-click:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd_cross
+    priority: 0
+  t-ecd-small-offers-like:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd_cross
+    priority: 0
+  t-ecd-small-offers-clickout:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd_cross
+    priority: 0
+  t-ecd-payments:
+    attributes:
+      brand_id:
+        field: brand_id
+      price:
+        field: price
+    source: tecd_cross
+    priority: 0
+inputs:
+  short:
+    events:
+    - t-ecd-small-retail-click
+    - t-ecd-small-retail-added-to-cart
+    - t-ecd-small-retail-like
+  like:
+    events:
+    - t-ecd-small-retail-like
+  lifelong:
+    events:
+    - t-ecd-small-retail-click
+    - t-ecd-small-retail-added-to-cart
+    - t-ecd-small-retail-like
+    - t-ecd-small-marketplace-click
+    - t-ecd-small-marketplace-like
+    - t-ecd-small-marketplace-clickout
+    - t-ecd-small-offers-click
+    - t-ecd-small-offers-like
+    - t-ecd-small-offers-clickout
+    - t-ecd-payments

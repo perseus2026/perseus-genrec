@@ -1,0 +1,14 @@
+task:
+  metrics:
+    Recall@200:
+      type: recall_at_k
+      params:
+        k: 200
+    NDCG@200:
+      type: ndcg_at_k
+      params:
+        k: 200
+inference:
+  predict_kwargs:
+    k: 200
+    beam_size: 200

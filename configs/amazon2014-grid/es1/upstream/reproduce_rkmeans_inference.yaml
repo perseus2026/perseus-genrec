@@ -1,0 +1,15 @@
+# @package _global_
+defaults:
+  - rkmeans_inference_flat
+  - _self_
+embedding_dim: 2048
+num_hierarchies: 3
+codebook_width: 256
+seed: 42
+model:
+  normalize_residuals: true
+callbacks:
+  bq_writer: null
+trainer:
+  devices: 1
+  strategy: ddp

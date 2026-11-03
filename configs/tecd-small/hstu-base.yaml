@@ -1,0 +1,36 @@
+extends: base.yaml
+model:
+  type: hstu
+  params:
+    dim: 256
+    embedding_dim: 256
+    num_heads: 4
+    num_layers: 4
+    dropout: 0.1
+    catalog_chunk_size: 65536
+    max_len: 512
+    num_time_buckets: 128
+    weight_initialization: perseus
+    feature_fusion: sum
+task:
+  objective:
+    type: item_cross_entropy
+    loss:
+      type: sampled_cross_entropy
+      reduction: mean_targets_per_sample
+      num_negatives: 4096
+training:
+  dataloader:
+    batch_size: 128
+  validation_dataloader:
+    batch_size: 256
+  optimizer:
+    params:
+      lr: 0.002
+      foreach: false
+  gradient_accumulation_steps: 4
+inference:
+  predict_kwargs:
+    k: 100
+  dataloader:
+    batch_size: 256

@@ -1,0 +1,3 @@
+extends:
+- onerec-retail-positives-md.yaml
+- inference-test.yaml

@@ -1,0 +1,23 @@
+extends:
+- data-all-features.yaml
+- hstu-base.yaml
+- embeddings-all-features.yaml
+event_encoders:
+  history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+      - is_organic
+inputs:
+  short:
+    features:
+    - item
+  like:
+    features:
+    - item
+  lifelong:
+    event_encoder: history
+model:
+  params:
+    feature_fusion: concat_projection

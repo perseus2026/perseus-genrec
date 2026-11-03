@@ -1,0 +1,56 @@
+task:
+  type: retrieval
+  objective:
+    target: item
+    loss:
+      type: cross_entropy
+      reduction: mean_tokens_then_targets_per_sample
+  metrics:
+    Recall@5: {type: recall_at_k, params: {k: 5}}
+    NDCG@5: {type: ndcg_at_k, params: {k: 5}}
+
+events:
+  view:
+    attributes:
+      item: {field: item_id}
+encoders:
+  item:
+    type: semantic_id
+    preprocessor: {artifact: item_to_sid, item_id_column: item_id}
+    embedder: {prefix_length: 3}
+features:
+  item:
+    located_in: {event: true}
+    encoder: item
+event_encoders:
+  history: {type: concat_projection}
+inputs:
+  history:
+    type: sequence
+    events: [view]
+    features: [item]
+    event_encoder: history
+    max_events_per_sequence: 5
+
+model:
+  type: onerec
+  params:
+    dim: 32
+    num_heads: 2
+    d_kv: 16
+    dim_feedforward: 64
+    dropout: 0.0
+    encoder: {num_layers: 1, position_embeddings: [absolute]}
+    decoder: {num_layers: 1}
+training:
+  num_epochs: 3
+  tracker: {type: logging}
+  dataloader: {batch_size: 16, shuffle: true, seed: 42}
+  validation_dataloader: {batch_size: 16}
+  optimizer:
+    type: adam
+    params: {lr: 0.001}
+  early_stopping: {metric: NDCG@5, patience: 3}
+inference:
+  dataloader: {batch_size: 16}
+  predict_kwargs: {k: 5, beam_size: 5}

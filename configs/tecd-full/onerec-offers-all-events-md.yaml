@@ -1,0 +1,20 @@
+extends:
+- onerec-offers-all-events-sd.yaml
+- data-md-all-events.yaml
+inputs:
+  lifelong:
+    events:
+    - t-ecd-full-offers-view
+    - t-ecd-full-offers-click
+    - t-ecd-full-offers-like
+    - t-ecd-full-offers-clickout
+    - t-ecd-full-retail-view
+    - t-ecd-full-retail-click
+    - t-ecd-full-retail-added-to-cart
+    - t-ecd-full-retail-order
+    - t-ecd-full-marketplace-view
+    - t-ecd-full-marketplace-click
+    - t-ecd-full-marketplace-like
+    - t-ecd-full-marketplace-clickout
+    - t-ecd-full-payments-payment
+    - t-ecd-full-payments-receipt

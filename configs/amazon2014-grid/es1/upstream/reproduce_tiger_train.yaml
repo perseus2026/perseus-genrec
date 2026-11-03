@@ -1,0 +1,57 @@
+# @package _global_
+defaults:
+  - tiger_train_flat
+  - _self_
+
+# Historical MLP1/beam10 NoAug runs: one final target, up to 20 preceding items.
+category: ???
+step_budgets:
+  beauty: 34942
+  toys: 30331
+  sports: 55622
+num_hierarchies: 4
+sequence_length: 84
+seed: 42
+train: true
+test: true
+should_skip_retry: true
+
+optim:
+  optimizer:
+    lr: 0.0005
+    weight_decay: 0.000001
+trainer:
+  devices: 1
+  accumulate_grad_batches: 1
+  max_steps: ${step_budgets.${category}}
+  max_epochs: -1
+  val_check_interval: 100
+  check_val_every_n_epoch: null
+data_loading:
+  train_dataloader_config:
+    dataloader:
+      batch_size_per_device: 256
+      # Replace the augmentation collator entirely, including its extra arguments.
+      collate_fn: ${data_loading.val_dataloader_config.dataloader.collate_fn}
+model:
+  num_user_bins: 2000
+  mlp_layers: 1
+  should_add_sep_token: true
+  top_k_for_generation: 10
+  should_check_prefix: true
+  huggingface_model:
+    config:
+      dropout_rate: 0.15
+  decoder:
+    config:
+      dropout_rate: 0.15
+callbacks:
+  model_checkpoint:
+    monitor: val/recall@10
+    filename: best_{step:06d}
+    auto_insert_metric_name: false
+    save_last: true
+  early_stopping:
+    monitor: val/ndcg@10
+    patience: 10
+  restart_job: null

@@ -1,0 +1,13 @@
+extends: grid-base.yaml
+events:
+  amazon2014grid-sports-review:
+    attributes:
+      item:
+        field: item_id
+      event:
+        field: event
+    source: amazon2014grid
+encoders:
+  event:
+    preprocessor:
+      categories: [amazon2014grid-sports-review]

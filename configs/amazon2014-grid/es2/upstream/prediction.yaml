@@ -1,0 +1,57 @@
+# @package _global_
+task_name: inference
+train: false
+test: false
+ckpt_path: ???
+callbacks:
+  model_checkpoint: null
+  early_stopping: null
+  model_summary: null
+  bq_writer: null
+  pickle_writer:
+    _target_: src.utils.inference_utils.LocalPickleWriter
+    output_dir: ${paths.output_dir}/pickle
+    flush_frequency: 100000
+    write_interval: batch
+    should_merge_files_on_main: true
+    prediction_key_name: item_id
+    prediction_name: cluster_ids
+    post_processing_functions:
+    - function:
+        _target_: src.utils.tensor_utils.deduplicate_rows_in_tensor
+        _partial_: true
+      main_only: true
+    - function:
+        _target_: src.utils.tensor_utils.transpose_tensor_from_file
+        _partial_: true
+      main_only: true
+trainer:
+  strategy: ddp
+  sync_batchnorm: false
+data_loading:
+  datamodule:
+    predict_dataloader_config:
+      _target_: src.data.loading.components.interfaces.ItemDataloaderConfig
+      dataset_class:
+        _target_: src.data.loading.components.dataloading.UnboundedSequenceIterable
+        _partial_: true
+      data_folder: ${paths.data_dir}/items
+      should_shuffle_rows: false
+      batch_size_per_device: 128
+      num_workers: 0
+      assign_files_by_size: true
+      timeout: 0
+      drop_last: false
+      pin_memory: false
+      persistent_workers: false
+      collate_fn:
+        _target_: src.data.loading.components.collate_functions.collate_fn_items
+        _partial_: true
+        item_id_field: ${data_loading.dataset_config.dataset.item_id_field}
+        feature_to_input_name:
+          id: item_ids
+          text: text_tokens
+          text_mask: text_mask
+          embedding: input_embedding
+      dataset_config: ${data_loading.dataset_config.dataset}
+      limit_files: null

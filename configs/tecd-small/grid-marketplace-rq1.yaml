@@ -1,0 +1,7 @@
+extends:
+- data-marketplace-rq1.yaml
+- grid-base.yaml
+training:
+  dataloader:
+    batch_size: 16
+  gradient_accumulation_steps: 32

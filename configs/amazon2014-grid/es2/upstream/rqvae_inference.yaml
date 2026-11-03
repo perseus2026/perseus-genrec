@@ -1,0 +1,5 @@
+# @package _global_
+defaults:
+- /experiment/es2/rqvae_train@_global_
+- /experiment/es2/prediction@_global_
+- _self_

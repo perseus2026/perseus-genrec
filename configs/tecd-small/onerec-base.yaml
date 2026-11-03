@@ -1,0 +1,36 @@
+extends: base.yaml
+model:
+  type: onerec
+  params:
+    backbone: t5
+    dim: 256
+    num_heads: 4
+    dim_feedforward: 512
+    dropout: 0.1
+    weight_initialization: default
+    target_chunk_size: 128
+    encoder:
+      num_layers: 4
+      position_embeddings:
+      - daily_recency
+      - qformer_recency
+      - absolute
+      source_position_layout: fixed
+    decoder:
+      num_layers: 4
+      level_embeddings: true
+    decoder_activation_checkpointing: false
+task:
+  objective:
+    type: autoregressive_semantic_id
+    loss:
+      type: cross_entropy
+      reduction: mean_tokens_then_targets_per_sample
+inference:
+  predict_kwargs:
+    k: 100
+    beam_size: 100
+encoders:
+  item:
+    embedder:
+      prefix_length: 3

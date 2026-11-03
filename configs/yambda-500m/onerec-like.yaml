@@ -1,0 +1,32 @@
+extends:
+- data-like.yaml
+- onerec-base.yaml
+event_encoders:
+  history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+inputs:
+  short:
+    features:
+    - item
+    - event
+    event_encoder: history
+  like:
+    features:
+    - item
+    - event
+    event_encoder: history
+  lifelong:
+    features:
+    - item
+    - event
+    event_encoder: history
+    compression:
+      type: qformer
+      params:
+        num_queries: 362
+        num_layers: 2
+        num_heads: 4
+        dim_feedforward: 512

@@ -1,0 +1,31 @@
+extends: base.yaml
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+features:
+  item:
+    located_in:
+      event: true
+    encoder: item
+inputs:
+  short:
+    type: sequence
+    features:
+    - item
+    max_events_per_sequence: 50
+    selection: recent
+  like:
+    type: sequence
+    features:
+    - item
+    max_events_per_sequence: 100
+    selection: recent
+  lifelong:
+    type: sequence
+    features:
+    - item
+    max_events_per_sequence: 512
+    selection: priority

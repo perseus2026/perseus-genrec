@@ -1,0 +1,87 @@
+extends: base.yaml
+events:
+  yambda-50m-like:
+    attributes:
+      item:
+        field: item_id
+      is_organic:
+        field: is_organic
+    source: yambda
+    priority: 1
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+  is_organic:
+    type: id
+  album_id:
+    type: id
+  artist_id:
+    type: id
+  item_track_length_seconds:
+    type: ple
+    preprocessor:
+      max_bins: 256
+features:
+  item:
+    located_in:
+      event: true
+    encoder: item
+  is_organic:
+    located_in:
+      event: true
+    encoder: is_organic
+  album_id:
+    located_in:
+      event: true
+    encoder: album_id
+  artist_id:
+    located_in:
+      event: true
+    encoder: artist_id
+  item_track_length_seconds:
+    located_in:
+      event: true
+    encoder: item_track_length_seconds
+inputs:
+  short:
+    type: sequence
+    events:
+    - yambda-50m-like
+    features:
+    - item
+    - event
+    - is_organic
+    - album_id
+    - artist_id
+    - item_track_length_seconds
+    max_events_per_sequence: 50
+    selection: recent
+  like:
+    type: sequence
+    events:
+    - yambda-50m-like
+    features:
+    - item
+    - event
+    - is_organic
+    - album_id
+    - artist_id
+    - item_track_length_seconds
+    max_events_per_sequence: 100
+    selection: recent
+  lifelong:
+    type: sequence
+    events:
+    - yambda-50m-like
+    features:
+    - item
+    - event
+    - is_organic
+    - album_id
+    - artist_id
+    - item_track_length_seconds
+    max_events_per_sequence: 512
+    selection: priority

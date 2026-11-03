@@ -1,0 +1,61 @@
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+    embedder:
+      prefix_length: 3
+  brand_id:
+    type: id
+features:
+  item:
+    located_in:
+      event: true
+    encoder: item
+  brand_id:
+    located_in:
+      event: true
+      artifacts: true
+    encoder: brand_id
+event_encoders:
+  history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+inputs:
+  short:
+    type: sequence
+    features:
+    - item
+    - event
+    - brand_id
+    max_events_per_sequence: 50
+    selection: recent
+    event_encoder: history
+  like:
+    type: sequence
+    features:
+    - item
+    - event
+    - brand_id
+    max_events_per_sequence: 100
+    selection: recent
+    event_encoder: history
+  lifelong:
+    type: sequence
+    features:
+    - item
+    - event
+    - brand_id
+    max_events_per_sequence: 500
+    selection: priority
+    event_encoder: history
+    compression:
+      type: qformer
+      params:
+        num_queries: 362
+        num_layers: 2
+        num_heads: 4
+        dim_feedforward: 512

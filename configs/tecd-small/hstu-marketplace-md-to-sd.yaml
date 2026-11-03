@@ -1,0 +1,31 @@
+extends:
+- data-marketplace-cross-global.yaml
+- hstu-base.yaml
+event_encoders:
+  global_history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+inputs:
+  short:
+    features:
+    - item
+  like:
+    features:
+    - item
+  lifelong:
+    features:
+    - item
+    - event
+    - subdomain
+    - brand_id
+    - category
+    - subcategory
+    - price
+    optional_features:
+    - item
+    event_encoder: global_history
+model:
+  params:
+    feature_fusion: concat_projection

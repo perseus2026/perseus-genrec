@@ -1,0 +1,52 @@
+extends:
+- onerec-base.yaml
+- data-sd.yaml
+events:
+  t-ecd-full-marketplace-click:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-full-marketplace-like:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-full-marketplace-clickout:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+inputs:
+  short:
+    events:
+    - t-ecd-full-marketplace-click
+    - t-ecd-full-marketplace-like
+    - t-ecd-full-marketplace-clickout
+  like:
+    events:
+    - t-ecd-full-marketplace-like
+    - t-ecd-full-marketplace-clickout
+  lifelong:
+    events:
+    - t-ecd-full-marketplace-click
+    - t-ecd-full-marketplace-like
+    - t-ecd-full-marketplace-clickout
+training:
+  dataloader:
+    batch_size: 256
+  gradient_accumulation_steps: 2
+  validation_dataloader:
+    batch_size: 8
+inference:
+  dataloader:
+    batch_size: 4

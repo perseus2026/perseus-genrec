@@ -1,0 +1,23 @@
+# @package _global_
+defaults:
+  - rkmeans_train_flat
+  - _self_
+embedding_dim: 2048
+num_hierarchies: 3
+codebook_width: 256
+seed: 42
+model:
+  normalize_residuals: true
+trainer:
+  devices: 8
+  max_steps: 3000
+  max_epochs: -1
+data_loading:
+  datamodule:
+    train_dataloader_config:
+      batch_size_per_device: 2048
+callbacks:
+  early_stopping: null
+  model_checkpoint:
+    save_last: true
+should_skip_retry: true

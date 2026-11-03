@@ -1,0 +1,18 @@
+extends: data-rq1.yaml
+events:
+  t-ecd-small-marketplace-click:
+    attributes:
+      item:
+        field: item_id
+    source: tecd
+    priority: 1
+inputs:
+  short:
+    events:
+    - t-ecd-small-marketplace-click
+  like:
+    events:
+    - t-ecd-small-marketplace-click
+  lifelong:
+    events:
+    - t-ecd-small-marketplace-click

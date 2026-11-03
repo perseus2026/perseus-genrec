@@ -1,0 +1,38 @@
+# @package _global_
+defaults:
+- /experiment/rkmeans_train_flat@_global_
+- _self_
+embedding_dim: 2048
+num_hierarchies: 3
+codebook_width: 256
+trainer:
+  devices:
+  - 0
+  strategy: ddp_find_unused_parameters_true
+  sync_batchnorm: false
+  max_steps: 3000
+  max_epochs: -1
+  accumulate_grad_batches: 1
+data_loading:
+  datamodule:
+    train_dataloader_config:
+      batch_size_per_device: 16384
+      num_workers: 0
+      timeout: 0
+      pin_memory: false
+      persistent_workers: false
+    val_dataloader_config:
+      num_workers: 0
+      timeout: 0
+      pin_memory: false
+      persistent_workers: false
+    test_dataloader_config:
+      num_workers: 0
+      timeout: 0
+      pin_memory: false
+      persistent_workers: false
+callbacks:
+  early_stopping: null
+  model_checkpoint:
+    save_last: true
+should_skip_retry: true

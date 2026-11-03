@@ -1,0 +1,134 @@
+task:
+  type: retrieval
+  metrics:
+    HitRate@5:
+      type: hit_rate_at_k
+      params:
+        k: 5
+    HitRate@10:
+      type: hit_rate_at_k
+      params:
+        k: 10
+    Recall@5:
+      type: recall_at_k
+      params:
+        k: 5
+    Recall@10:
+      type: recall_at_k
+      params:
+        k: 10
+    NDCG@5:
+      type: ndcg_at_k
+      params:
+        k: 5
+    NDCG@10:
+      type: ndcg_at_k
+      params:
+        k: 10
+  objective:
+    type: autoregressive_semantic_id
+    target: item
+    target_mode: all_targets_independent
+    loss:
+      type: cross_entropy
+      reduction: mean_tokens_then_targets_per_sample
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+    embedder:
+      prefix_length: 4
+  event:
+    type: id
+    preprocessor:
+      categories:
+      - amazon2014grid-beauty-review
+  user_bin:
+    type: id
+    preprocessor:
+      artifact: user_bin_categories
+features:
+  item:
+    located_in:
+      event: true
+    encoder: item
+  event:
+    located_in:
+      event: true
+    encoder: event
+  user_bin:
+    located_in:
+      context: true
+    encoder: user_bin
+event_encoders:
+  history:
+    type: identity
+    params:
+      token_layout: sid_sequence
+      additive_features: []
+inputs:
+  user:
+    type: context
+    features:
+    - user_bin
+    aggregation:
+      type: identity
+  history:
+    type: sequence
+    events:
+    - ${encoders.event.preprocessor.categories.0}
+    features:
+    - item
+    max_events_per_sequence: 20
+    event_encoder: history
+model:
+  type: onerec
+  params:
+    backbone: t5
+    dim: 128
+    num_heads: 6
+    dim_feedforward: 1024
+    dropout: 0.15
+    encoder:
+      num_layers: 4
+      position_embeddings:
+      - relative
+      source_position_layout: dynamic
+    decoder:
+      num_layers: 4
+      generation_prefix_length: 4
+      relative_attention: false
+    d_kv: 64
+    input_type_embeddings: false
+    weight_initialization: default
+training:
+  num_epochs: 400
+  log_every_n_train_steps: 100
+  validation_every_n_epochs: 1
+  dataloader:
+    batch_size: 256
+    shuffle: true
+    seed: 42
+  validation_dataloader:
+    batch_size: 16
+  optimizer:
+    type: adam
+    params:
+      lr: 0.0005
+      weight_decay: 1.0e-06
+  scheduler:
+    type: constant
+  early_stopping:
+    metric: Recall@10
+    patience: 10
+  mixed_precision: 'no'
+inference:
+  event_store_backend: disk
+  predict_kwargs:
+    k: 10
+    beam_size: 10
+  dataloader:
+    batch_size: 16
+  mixed_precision: 'no'

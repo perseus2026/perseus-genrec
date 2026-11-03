@@ -1,0 +1,99 @@
+extends: base.yaml
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+  subdomain:
+    type: id
+  brand_id:
+    type: id
+  category:
+    type: id
+  subcategory:
+    type: id
+  price:
+    type: ple
+    preprocessor:
+      max_bins: 256
+  socdem_cluster:
+    type: id
+  region:
+    type: id
+features:
+  item:
+    located_in:
+      event: true
+    encoder: item
+  subdomain:
+    located_in:
+      event: true
+    encoder: subdomain
+  brand_id:
+    located_in:
+      event: true
+    encoder: brand_id
+  category:
+    located_in:
+      event: true
+    encoder: category
+  subcategory:
+    located_in:
+      event: true
+    encoder: subcategory
+  price:
+    located_in:
+      event: true
+    encoder: price
+  socdem_cluster:
+    located_in:
+      context: true
+    encoder: socdem_cluster
+  region:
+    located_in:
+      context: true
+    encoder: region
+inputs:
+  short:
+    type: sequence
+    features:
+    - item
+    - event
+    - subdomain
+    - brand_id
+    - category
+    - subcategory
+    - price
+    max_events_per_sequence: 50
+    selection: recent
+  like:
+    type: sequence
+    features:
+    - item
+    - event
+    - subdomain
+    - brand_id
+    - category
+    - subcategory
+    - price
+    max_events_per_sequence: 100
+    selection: recent
+  lifelong:
+    type: sequence
+    features:
+    - event
+    - subdomain
+    - brand_id
+    - category
+    - subcategory
+    - price
+    max_events_per_sequence: 2048
+    selection: priority
+    max_priority_events_per_sequence: 512
+  user:
+    type: context
+    features:
+    - socdem_cluster
+    - region
+    selection: recent

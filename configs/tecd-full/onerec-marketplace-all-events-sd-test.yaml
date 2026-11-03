@@ -1,0 +1,3 @@
+extends:
+- onerec-marketplace-all-events-sd.yaml
+- inference-test.yaml

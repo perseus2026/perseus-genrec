@@ -1,0 +1,13 @@
+encoders:
+  is_organic:
+    embedder:
+      dim: 256
+  album_id:
+    embedder:
+      dim: 64
+  artist_id:
+    embedder:
+      dim: 64
+  item_track_length_seconds:
+    embedder:
+      dim: 64

@@ -1,0 +1,3 @@
+extends:
+- onerec-retail-all-events-sd.yaml
+- inference-test.yaml

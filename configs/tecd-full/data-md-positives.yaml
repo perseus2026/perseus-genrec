@@ -1,0 +1,70 @@
+events:
+  t-ecd-full-retail-click:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-retail-added-to-cart:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-retail-order:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-marketplace-click:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-marketplace-like:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-marketplace-clickout:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-offers-click:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-offers-like:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-offers-clickout:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-payments-payment:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+  t-ecd-full-payments-receipt:
+    attributes:
+      brand_id:
+        field: brand_id
+    source: tecd
+event_encoders:
+  global_history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+inputs:
+  lifelong:
+    features:
+    - event
+    - brand_id
+    max_events_per_sequence: 2048
+    max_priority_events_per_sequence: 512
+    event_encoder: global_history

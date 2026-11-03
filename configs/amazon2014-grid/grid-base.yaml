@@ -1,0 +1,55 @@
+extends: base.yaml
+
+task:
+  objective:
+    loss:
+      reduction: sum_tokens_then_targets_per_sample
+
+model:
+  type: grid
+  params:
+    history_input: history
+    max_history_items: 20
+    dim: 128
+    num_heads: 6
+    head_dim: 64
+    dim_feedforward: 1024
+    num_feedforward_hidden_layers: 1
+    feed_forward_type: mlp
+    feed_forward_proj: relu
+    dropout: 0.15
+    weight_initialization: grid
+    target_chunk_size: 256
+    decoder_activation_checkpointing: false
+    encoder:
+      num_layers: 4
+      user_id_buckets: 2000
+      item_separator: true
+    decoder:
+      num_layers: 4
+      bos_token: learned
+      output_head: per_level
+    codebook_sizes:
+    - 256
+    - 256
+    - 256
+    collision_codebook_size: 256
+    user_id_column: grid_user_id
+    user_id_hash: modulo
+    training_recipe:
+      max_steps: null
+      validation_every_n_steps: 100
+      checkpoint_metric: Recall@10
+
+# No augmentation: one source row per user, with the existing NoAug/h20 data.
+training:
+  early_stopping:
+    metric: NDCG@10
+    patience: 10
+
+inference:
+  predict_kwargs:
+    k: 10
+    beam_size: 10
+    constraint: prefix
+    renormalize_logits: true

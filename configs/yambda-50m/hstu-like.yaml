@@ -1,0 +1,14 @@
+extends:
+- data-like.yaml
+- hstu-base.yaml
+inputs:
+  short:
+    features:
+    - item
+  like:
+    features:
+    - item
+  lifelong:
+    features:
+    - item
+    - event

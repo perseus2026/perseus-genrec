@@ -1,0 +1,3 @@
+extends:
+- onerec-offers-positives-md.yaml
+- inference-test.yaml

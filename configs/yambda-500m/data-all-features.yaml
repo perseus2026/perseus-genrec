@@ -1,0 +1,79 @@
+extends: data-like.yaml
+events:
+  yambda-500m-dislike:
+    attributes:
+      item:
+        field: item_id
+      is_organic:
+        field: is_organic
+    source: yambda
+    priority: 0
+  yambda-500m-listen:
+    attributes:
+      item:
+        field: item_id
+      is_organic:
+        field: is_organic
+      played_ratio_pct:
+        field: played_ratio_pct
+      track_length_seconds:
+        field: track_length_seconds
+    source: yambda
+    priority: 0
+encoders:
+  played_ratio_pct:
+    type: ple
+    preprocessor:
+      max_bins: 256
+  track_length_seconds:
+    type: ple
+    preprocessor:
+      max_bins: 256
+features:
+  played_ratio_pct:
+    located_in:
+      event: true
+    encoder: played_ratio_pct
+  track_length_seconds:
+    located_in:
+      event: true
+    encoder: track_length_seconds
+inputs:
+  short:
+    events:
+    - yambda-500m-dislike
+    - yambda-500m-listen
+    - yambda-500m-like
+    features:
+    - item
+    - event
+    - is_organic
+    - album_id
+    - artist_id
+    - item_track_length_seconds
+    - played_ratio_pct
+    - track_length_seconds
+  like:
+    features:
+    - item
+    - event
+    - is_organic
+    - album_id
+    - artist_id
+    - item_track_length_seconds
+    - played_ratio_pct
+    - track_length_seconds
+  lifelong:
+    events:
+    - yambda-500m-dislike
+    - yambda-500m-listen
+    - yambda-500m-like
+    features:
+    - item
+    - event
+    - is_organic
+    - album_id
+    - artist_id
+    - item_track_length_seconds
+    - played_ratio_pct
+    - track_length_seconds

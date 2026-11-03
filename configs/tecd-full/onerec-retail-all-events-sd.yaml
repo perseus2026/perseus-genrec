@@ -1,0 +1,57 @@
+extends:
+- onerec-base.yaml
+- data-sd.yaml
+events:
+  t-ecd-full-retail-view:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-full-retail-click:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-full-retail-added-to-cart:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+  t-ecd-full-retail-order:
+    attributes:
+      item:
+        field: item_id
+      brand_id:
+        field: brand_id
+    source: tecd
+    priority: 1
+inputs:
+  short:
+    events:
+    - t-ecd-full-retail-view
+    - t-ecd-full-retail-click
+    - t-ecd-full-retail-added-to-cart
+    - t-ecd-full-retail-order
+  like:
+    events:
+    - t-ecd-full-retail-added-to-cart
+    - t-ecd-full-retail-order
+  lifelong:
+    events:
+    - t-ecd-full-retail-view
+    - t-ecd-full-retail-click
+    - t-ecd-full-retail-added-to-cart
+    - t-ecd-full-retail-order
+training:
+  dataloader:
+    batch_size: 256
+  gradient_accumulation_steps: 2

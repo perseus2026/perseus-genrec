@@ -1,0 +1,59 @@
+extends: data-like.yaml
+model:
+  type: grid
+  params:
+    history_input: lifelong
+    max_history_items: 102
+    dim: 128
+    num_heads: 6
+    head_dim: 64
+    dim_feedforward: 1024
+    num_feedforward_hidden_layers: 2
+    feed_forward_type: mlp
+    feed_forward_proj: relu
+    dropout: 0.15
+    weight_initialization: grid
+    target_chunk_size: 128
+    decoder_activation_checkpointing: false
+    encoder:
+      num_layers: 4
+      user_id_buckets: 0
+      item_separator: true
+    decoder:
+      num_layers: 4
+      bos_token: learned
+      output_head: per_level
+    codebook_sizes:
+    - 128
+    - 128
+    - 128
+task:
+  objective:
+    type: autoregressive_semantic_id
+    loss:
+      type: cross_entropy
+      reduction: mean_tokens_then_targets_per_sample
+training:
+  dataloader:
+    batch_size: 32
+  validation_dataloader:
+    batch_size: 8
+  gradient_accumulation_steps: 16
+inference:
+  predict_kwargs:
+    k: 100
+    beam_size: 100
+    constraint: prefix
+    renormalize_logits: false
+  dataloader:
+    batch_size: 8
+inputs:
+  short:
+    features:
+    - item
+  like:
+    features:
+    - item
+  lifelong:
+    features:
+    - item

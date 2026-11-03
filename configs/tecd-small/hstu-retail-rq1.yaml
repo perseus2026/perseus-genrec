@@ -1,0 +1,3 @@
+extends:
+- data-retail-rq1.yaml
+- hstu-base.yaml

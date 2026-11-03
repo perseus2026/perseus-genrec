@@ -1,0 +1,51 @@
+task:
+  type: retrieval
+  metrics:
+    Recall@100:
+      type: recall_at_k
+      params:
+        k: 100
+    NDCG@100:
+      type: ndcg_at_k
+      params:
+        k: 100
+  objective:
+    target: item
+    target_mode: all_targets_independent
+max_duration_per_sequence: 365d
+training:
+  num_epochs: 30
+  log_every_n_train_steps: 500
+  validation_every_n_epochs: 3
+  tracker:
+    type: logging
+  dataloader:
+    batch_size: 512
+    num_workers: 8
+    pin_memory: true
+    shuffle: true
+    seed: 42
+  validation_dataloader:
+    batch_size: 32
+    num_workers: 8
+    pin_memory: true
+  optimizer:
+    type: adam
+    params:
+      lr: 0.0005
+  scheduler:
+    type: constant
+  early_stopping:
+    metric: Recall@100
+    patience: 4
+  gradient_clip_norm: 1.0
+  gradient_accumulation_steps: 1
+  gradient_checkpointing: false
+  mixed_precision: bf16
+inference:
+  event_store_backend: disk
+  mixed_precision: bf16
+  dataloader:
+    batch_size: 32
+    num_workers: 0
+    pin_memory: true

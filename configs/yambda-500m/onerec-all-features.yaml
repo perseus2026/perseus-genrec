@@ -1,0 +1,29 @@
+extends:
+- data-all-features.yaml
+- onerec-base.yaml
+- embeddings-all-features.yaml
+event_encoders:
+  history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+      - is_organic
+inputs:
+  short:
+    event_encoder: history
+  like:
+    event_encoder: history
+  lifelong:
+    event_encoder: history
+    compression:
+      type: qformer
+      params:
+        num_queries: 362
+        num_layers: 2
+        num_heads: 4
+        dim_feedforward: 512
+training:
+  dataloader:
+    batch_size: 256
+  gradient_accumulation_steps: 2

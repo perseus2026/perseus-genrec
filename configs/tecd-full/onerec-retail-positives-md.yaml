@@ -1,0 +1,17 @@
+extends:
+- onerec-retail-positives-sd.yaml
+- data-md-positives.yaml
+inputs:
+  lifelong:
+    events:
+    - t-ecd-full-retail-click
+    - t-ecd-full-retail-added-to-cart
+    - t-ecd-full-retail-order
+    - t-ecd-full-marketplace-click
+    - t-ecd-full-marketplace-like
+    - t-ecd-full-marketplace-clickout
+    - t-ecd-full-offers-click
+    - t-ecd-full-offers-like
+    - t-ecd-full-offers-clickout
+    - t-ecd-full-payments-payment
+    - t-ecd-full-payments-receipt

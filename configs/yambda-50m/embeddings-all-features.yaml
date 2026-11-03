@@ -1,0 +1,8 @@
+extends: embeddings-like-features.yaml
+encoders:
+  played_ratio_pct:
+    embedder:
+      dim: 64
+  track_length_seconds:
+    embedder:
+      dim: 64

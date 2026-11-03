@@ -1,0 +1,8 @@
+# @package _global_
+# GRID Hydra config, not a genrecsys model config.
+defaults:
+  - sem_embeds_inference_flat
+  - _self_
+trainer:
+  devices: 1
+  strategy: ddp
