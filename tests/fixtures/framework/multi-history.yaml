@@ -1,0 +1,284 @@
+# Synthetic recipe for framework behavior tests; no external dataset.
+task:
+  type: retrieval
+  baseline:
+    type: global_count
+  metrics:
+    hit rate@20:
+      type: hit_rate_at_k
+      params:
+        k: 20
+    recall@20:
+      type: recall_at_k
+      params:
+        k: 20
+    ndcg@20:
+      type: ndcg_at_k
+      params:
+        k: 20
+    hit rate@200:
+      type: hit_rate_at_k
+      params:
+        k: 200
+    recall@200:
+      type: recall_at_k
+      params:
+        k: 200
+    ndcg@200:
+      type: ndcg_at_k
+      params:
+        k: 200
+  objective:
+    type: autoregressive_semantic_id
+    target: item
+    target_mode: all_targets_independent
+    loss:
+      type: cross_entropy
+      reduction: mean_tokens_then_targets_per_sample
+events:
+  item-view:
+    attributes:
+      item_label: null
+      source_id: null
+  item-click:
+    attributes:
+      item_label: null
+      source_id: null
+  item-favorite:
+    attributes:
+      item_label: null
+      source_id: null
+  item-open:
+    attributes:
+      item_label: null
+      source_id: null
+  item-rate:
+    attributes:
+      item_label: null
+      source_id: null
+  item-confirm:
+    attributes:
+      item_label: null
+      source_id: null
+  item-select:
+    attributes:
+      item_label: null
+      source_id: null
+  merchant-visit:
+    attributes:
+      merchant_id: null
+max_duration_per_sequence: 180d
+encoders:
+  merchant_id:
+    type: id
+    preprocessor:
+      artifact: merchant_vocab
+      vocab_size: 25001
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+    embedder:
+      prefix_length: 2
+  interaction_time:
+    type: id
+    preprocessor:
+      artifact: time_vocab
+  user_features:
+    type: id
+    preprocessor:
+      artifact: context_vocab
+features:
+  merchant_id:
+    located_in:
+      event: true
+    encoder: merchant_id
+  item:
+    located_in:
+      event: true
+    encoder: item
+  interaction_weekday:
+    transform:
+      type: weekday
+    located_in:
+      event: true
+    encoder: interaction_time
+  interaction_time_of_day:
+    transform:
+      type: time_of_day
+    located_in:
+      event: true
+    encoder: interaction_time
+  user_category_a:
+    located_in:
+      context: true
+    encoder: user_features
+  user_category_b:
+    located_in:
+      context: true
+    encoder: user_features
+  user_category_c:
+    located_in:
+      context: true
+    encoder: user_features
+  user_category_d:
+    located_in:
+      context: true
+    encoder: user_features
+  user_category_e:
+    located_in:
+      context: true
+    encoder: user_features
+  user_category_f:
+    located_in:
+      context: true
+    encoder: user_features
+  user_category_g:
+    located_in:
+      context: true
+    encoder: user_features
+event_encoders:
+  item_history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+  transaction:
+    type: identity
+inputs:
+  short:
+    type: sequence
+    event_encoder: item_history
+    events:
+    - item-view
+    - item-click
+    - item-favorite
+    - item-open
+    - item-rate
+    - item-confirm
+    - item-select
+    features:
+    - item
+    - event
+    - interaction_weekday
+    - interaction_time_of_day
+    max_events_per_sequence: 20
+  positive:
+    type: sequence
+    event_encoder: item_history
+    events:
+    - item-click
+    - item-favorite
+    - item-open
+    - item-rate
+    - item-confirm
+    - item-select
+    features:
+    - item
+    - event
+    - interaction_weekday
+    - interaction_time_of_day
+    max_events_per_sequence: 100
+  lifelong:
+    type: sequence
+    event_encoder: item_history
+    events:
+    - item-view
+    - item-click
+    - item-favorite
+    - item-open
+    - item-rate
+    - item-confirm
+    - item-select
+    features:
+    - item
+    - event
+    - interaction_weekday
+    - interaction_time_of_day
+    max_events_per_sequence: 500
+    compression:
+      type: qformer
+      params:
+        num_queries: 128
+        num_layers: 2
+        num_heads: 8
+        dim_feedforward: 512
+  transactions:
+    type: sequence
+    event_encoder: transaction
+    events:
+    - merchant-visit
+    features:
+    - merchant_id
+    max_events_per_sequence: 1000
+    max_duration_per_sequence: 180d
+    compression:
+      type: qformer
+      params:
+        num_queries: 128
+        num_layers: 2
+        num_heads: 8
+        dim_feedforward: 512
+  user:
+    type: context
+    features:
+    - user_category_a
+    - user_category_b
+    - user_category_c
+    - user_category_d
+    - user_category_e
+    - user_category_f
+    - user_category_g
+    aggregation:
+      type: concat_projection
+model:
+  type: onerec
+  params:
+    dim: 256
+    num_heads: 8
+    dim_feedforward: 512
+    dropout: 0.1
+    backbone: t5
+    weight_initialization: default
+    target_chunk_size: 128
+    encoder:
+      num_layers: 8
+      position_embeddings:
+      - absolute
+      - qformer_recency
+      source_position_layout: dynamic
+    decoder:
+      num_layers: 8
+training:
+  num_epochs: 20
+  log_every_n_train_steps: 100
+  validation_every_n_epochs: 1
+  tracker:
+    type: logging
+  dataloader:
+    batch_size: 128
+    num_workers: 8
+    pin_memory: true
+    shuffle: true
+  validation_dataloader:
+    batch_size: 16
+    num_workers: 0
+    pin_memory: true
+  optimizer:
+    type: adam
+    params:
+      lr: 0.0003
+  scheduler:
+    type: constant
+  early_stopping:
+    metric: ndcg@200
+    patience: 4
+inference:
+  event_store_backend: ram
+  dataloader:
+    batch_size: 16
+    num_workers: 0
+    pin_memory: true
+  predict_kwargs:
+    k: 200
+    beam_size: 200

@@ -1,0 +1,240 @@
+extends: ../../../configs/tecd-small/onerec-base.yaml
+events:
+  t-ecd-small-retail-like:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+      event:
+        field: event
+    source: tecd
+    priority: 1
+  t-ecd-small-retail-click:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+      event:
+        field: event
+    source: tecd
+    priority: 0
+  t-ecd-small-retail-added-to-cart:
+    attributes:
+      item:
+        field: item_id
+      subdomain:
+        field: subdomain
+      brand_id:
+        field: brand_id
+      event:
+        field: event
+    source: tecd
+    priority: 0
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+    embedder:
+      prefix_length: 3
+  subdomain:
+    type: id
+    preprocessor: {}
+    embedder: {}
+  brand_id:
+    type: id
+    preprocessor: {}
+    embedder: {}
+  category:
+    type: id
+    preprocessor: {}
+    embedder: {}
+  subcategory:
+    type: id
+    preprocessor: {}
+    embedder: {}
+  price:
+    type: ple
+    preprocessor:
+      max_bins: 256
+    embedder: {}
+  socdem_cluster:
+    type: id
+    preprocessor: {}
+    embedder: {}
+  region:
+    type: id
+    preprocessor: {}
+    embedder: {}
+  event:
+    type: id
+    preprocessor:
+      categories:
+      - t-ecd-small-retail-like
+      - t-ecd-small-retail-click
+      - t-ecd-small-retail-added-to-cart
+    embedder: {}
+features:
+  item:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: item
+    transform: null
+  subdomain:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: subdomain
+    transform: null
+  brand_id:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: brand_id
+    transform: null
+  category:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: category
+    transform: null
+  subcategory:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: subcategory
+    transform: null
+  price:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: price
+    transform: null
+  socdem_cluster:
+    located_in:
+      event: false
+      context: true
+      artifacts: false
+    encoder: socdem_cluster
+    transform: null
+  region:
+    located_in:
+      event: false
+      context: true
+      artifacts: false
+    encoder: region
+    transform: null
+  event:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: event
+    transform: null
+event_encoders:
+  history:
+    type: concat_projection
+    params:
+      additive_features:
+      - event
+inputs:
+  short:
+    type: sequence
+    events:
+    - t-ecd-small-retail-click
+    - t-ecd-small-retail-added-to-cart
+    - t-ecd-small-retail-like
+    features:
+    - item
+    - event
+    - subdomain
+    - brand_id
+    - category
+    - subcategory
+    - price
+    optional_features: []
+    max_events_per_sequence: 50
+    selection: recent
+    max_priority_events_per_sequence: null
+    max_duration_per_sequence: null
+    event_encoder: history
+    aggregation: null
+    compression: null
+  like:
+    type: sequence
+    events:
+    - t-ecd-small-retail-like
+    features:
+    - item
+    - event
+    - subdomain
+    - brand_id
+    - category
+    - subcategory
+    - price
+    optional_features: []
+    max_events_per_sequence: 100
+    selection: recent
+    max_priority_events_per_sequence: null
+    max_duration_per_sequence: null
+    event_encoder: history
+    aggregation: null
+    compression: null
+  lifelong:
+    type: sequence
+    events:
+    - t-ecd-small-retail-click
+    - t-ecd-small-retail-added-to-cart
+    - t-ecd-small-retail-like
+    features:
+    - item
+    - event
+    - subdomain
+    - brand_id
+    - category
+    - subcategory
+    - price
+    optional_features: []
+    max_events_per_sequence: 512
+    selection: priority
+    max_priority_events_per_sequence: null
+    max_duration_per_sequence: null
+    event_encoder: history
+    aggregation: null
+    compression:
+      type: qformer
+      params:
+        num_queries: 361
+        num_layers: 2
+        num_heads: 4
+        dim_feedforward: 512
+  user:
+    type: context
+    events: []
+    features:
+    - socdem_cluster
+    - region
+    optional_features: []
+    max_events_per_sequence: null
+    selection: recent
+    max_priority_events_per_sequence: null
+    max_duration_per_sequence: null
+    event_encoder: null
+    aggregation:
+      type: concat_projection
+      params: {}
+    compression: null

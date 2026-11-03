@@ -1,0 +1,157 @@
+task:
+  type: retrieval
+  baseline: null
+  metrics:
+    Recall@100:
+      type: recall_at_k
+      params:
+        k: 100
+    NDCG@100:
+      type: ndcg_at_k
+      params:
+        k: 100
+  objective:
+    type: autoregressive_semantic_id
+    target: item
+    target_mode: all_targets_independent
+    loss:
+      type: cross_entropy
+      reduction: mean_tokens_then_targets_per_sample
+events:
+  yambda-500m-like:
+    attributes:
+      item:
+        field: item_id
+    source: yambda
+    priority: 1
+max_duration_per_sequence: 365d
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+    embedder:
+      prefix_length: 4
+features:
+  item:
+    located_in:
+      event: true
+      context: false
+      artifacts: false
+    encoder: item
+    transform: null
+event_encoders:
+  history:
+    type: concat_projection
+    params: {}
+inputs:
+  short:
+    type: sequence
+    events:
+    - yambda-500m-like
+    features:
+    - item
+    optional_features: []
+    max_events_per_sequence: 50
+    max_priority_events_per_sequence: null
+    max_duration_per_sequence: null
+    event_encoder: history
+    aggregation: null
+    compression: null
+  like:
+    type: sequence
+    events:
+    - yambda-500m-like
+    features:
+    - item
+    optional_features: []
+    max_events_per_sequence: 100
+    max_priority_events_per_sequence: null
+    max_duration_per_sequence: null
+    event_encoder: history
+    aggregation: null
+    compression: null
+  lifelong:
+    selection: priority
+    type: sequence
+    events:
+    - yambda-500m-like
+    features:
+    - item
+    optional_features: []
+    max_events_per_sequence: 512
+    max_priority_events_per_sequence: null
+    max_duration_per_sequence: null
+    event_encoder: history
+    aggregation: null
+    compression:
+      type: qformer
+      params:
+        num_queries: 362
+        num_layers: 2
+        num_heads: 4
+        dim_feedforward: 512
+model:
+  type: onerec
+  params:
+    backbone: t5
+    dim: 256
+    num_heads: 4
+    dim_feedforward: 512
+    dropout: 0.1
+    weight_initialization: default
+    target_chunk_size: 128
+    encoder:
+      num_layers: 4
+      position_embeddings:
+      - daily_recency
+      - qformer_recency
+      - absolute
+      source_position_layout: fixed
+    decoder:
+      num_layers: 4
+      level_embeddings: true
+    decoder_activation_checkpointing: false
+training:
+  num_epochs: 20
+  log_every_n_train_steps: 500
+  validation_every_n_epochs: 1
+  tracker:
+    type: logging
+    params: {}
+  dataloader:
+    batch_size: 512
+    num_workers: 4
+    pin_memory: true
+    shuffle: true
+    seed: 42
+  validation_dataloader:
+    batch_size: 32
+    num_workers: 4
+    pin_memory: true
+  optimizer:
+    type: adam
+    params:
+      lr: 0.0005
+  scheduler:
+    type: constant
+    params: {}
+  early_stopping:
+    metric: Recall@100
+    patience: 4
+    min_delta: 0.0
+  gradient_clip_norm: 1.0
+  gradient_accumulation_steps: 1
+  gradient_checkpointing: false
+  mixed_precision: bf16
+inference:
+  event_store_backend: disk
+  predict_kwargs:
+    k: 100
+    beam_size: 100
+  dataloader:
+    batch_size: 32
+    num_workers: 0
+    pin_memory: true
+  mixed_precision: bf16

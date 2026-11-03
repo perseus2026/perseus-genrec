@@ -1,0 +1,210 @@
+# Synthetic recipe for framework behavior tests; no external dataset.
+task:
+  type: retrieval
+  objective:
+    type: autoregressive_semantic_id
+    target: item
+    target_mode: random
+    loss:
+      type: cross_entropy
+      reduction: mean_tokens
+  metrics:
+    HitRate@5:
+      type: hit_rate_at_k
+      params:
+        k: 5
+    HitRate@10:
+      type: hit_rate_at_k
+      params:
+        k: 10
+    HitRate@50:
+      type: hit_rate_at_k
+      params:
+        k: 50
+    HitRate@100:
+      type: hit_rate_at_k
+      params:
+        k: 100
+    Recall@5:
+      type: recall_at_k
+      params:
+        k: 5
+    Recall@10:
+      type: recall_at_k
+      params:
+        k: 10
+    Recall@50:
+      type: recall_at_k
+      params:
+        k: 50
+    Recall@100:
+      type: recall_at_k
+      params:
+        k: 100
+    NDCG@5:
+      type: ndcg_at_k
+      params:
+        k: 5
+    NDCG@10:
+      type: ndcg_at_k
+      params:
+        k: 10
+    NDCG@50:
+      type: ndcg_at_k
+      params:
+        k: 50
+    NDCG@100:
+      type: ndcg_at_k
+      params:
+        k: 100
+max_duration_per_sequence: 365d
+events:
+  view:
+    attributes:
+      item:
+        field: entity_id
+  feedback:
+    attributes:
+      item:
+        field: entity_id
+      interaction_subtype:
+        field: feedback_code
+  save:
+    attributes:
+      item:
+        field: entity_id
+  select:
+    attributes:
+      item:
+        field: entity_id
+      interaction_subtype:
+        field: action_code
+  revisit:
+    attributes:
+      item:
+        field: entity_id
+encoders:
+  item:
+    type: semantic_id
+    preprocessor:
+      artifact: item_to_sid
+      item_id_column: item_id
+    embedder:
+      prefix_length: 1
+  interaction_type:
+    type: id
+features:
+  item:
+    located_in:
+      event: true
+    encoder: item
+  interaction_type:
+    located_in:
+      event: true
+    encoder: interaction_type
+    transform:
+      type: event_with_optional_subtype
+event_encoders:
+  item_history:
+    type: concat_projection
+    params:
+      additive_features:
+      - interaction_type
+inputs:
+  short:
+    type: sequence
+    event_encoder: item_history
+    events:
+    - view
+    - feedback
+    - save
+    - select
+    - revisit
+    features:
+    - item
+    - interaction_type
+    max_events_per_sequence: 50
+  positive:
+    type: sequence
+    event_encoder: item_history
+    events:
+    - select
+    features:
+    - item
+    - interaction_type
+    max_events_per_sequence: 100
+  lifelong:
+    type: sequence
+    event_encoder: item_history
+    events:
+    - view
+    - feedback
+    - save
+    - select
+    - revisit
+    features:
+    - item
+    - interaction_type
+    max_events_per_sequence: 500
+    compression:
+      type: qformer
+      params:
+        num_queries: 128
+        num_layers: 2
+        num_heads: 8
+        dim_feedforward: 512
+model:
+  type: onerec
+  params:
+    backbone: t5
+    weight_initialization: default
+    dim: 256
+    num_heads: 8
+    dim_feedforward: 512
+    dropout: 0.1
+    encoder:
+      num_layers: 8
+      position_embeddings:
+      - absolute
+      - qformer_recency
+      source_position_layout: fixed
+    decoder:
+      num_layers: 8
+      generation_prefix_length: 1
+training:
+  tracker:
+    type: logging
+  num_epochs: 10
+  log_every_n_train_steps: 500
+  validation_every_n_epochs: 1
+  dataloader:
+    batch_size: 512
+    num_workers: 8
+    pin_memory: true
+    shuffle: true
+    seed: 42
+  validation_dataloader:
+    batch_size: 128
+    num_workers: 8
+    pin_memory: true
+  optimizer:
+    type: adam
+    params:
+      lr: 0.0004
+  scheduler:
+    type: constant
+  gradient_checkpointing: false
+  gradient_clip_norm: 1.0
+  gradient_accumulation_steps: 1
+  early_stopping:
+    metric: Recall@100
+    patience: 2
+inference:
+  event_store_backend: disk
+  dataloader:
+    batch_size: 128
+    num_workers: 0
+    pin_memory: true
+  predict_kwargs:
+    k: 100
+    beam_size: 100
